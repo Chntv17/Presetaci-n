@@ -1,0 +1,105 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia de Jordan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #e31222;
+            color: white;
+            text-align: center;
+            padding: 2em;
+        }
+        section {
+            margin: 2em auto;
+            padding: 1em;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1em 0;
+        }
+        h2 {
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Historia de Jordan</h1>
+    </header>
+
+    <section>
+        <h2>Los Inicios de Jordan</h2>
+        <img src="images/historia1.jpg" alt="Primeras zapatillas Jordan">
+        <p>La marca Jordan comenzó en 1984 cuando Nike firmó un contrato con Michael Jordan, una estrella emergente de la NBA. El lanzamiento de las Air Jordan 1 en 1985 revolucionó la industria del calzado deportivo, combinando rendimiento y estilo.</p>
+    </section>
+
+    <section>
+        <h2>Impacto Cultural</h2>
+        <img src="images/historia2.jpg" alt="Jordan en la cultura pop">
+        <p>Las zapatillas Jordan trascendieron el baloncesto, convirtiéndose en un ícono de la cultura pop. Desde colaboraciones con artistas hasta apariciones en películas, la marca se consolidó como un símbolo de estilo y autenticidad.</p>
+    </section>
+
+    <section>
+        <h2>Legado Moderno</h2>
+        <img src="images/historia3.jpg" alt="Jordan moderno">
+        <p>Hoy en día, Jordan sigue siendo líder en innovación y diseño. Con nuevos modelos y colaboraciones, la marca continúa inspirando a atletas y fanáticos de la moda en todo el mundo.</p>
+    </section>
+</body>
+</html>
